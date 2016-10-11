@@ -8,7 +8,6 @@ from threading import Thread
 THRESHOLD = '8%'
 TIME_FORMAT = '%Y%m%d_%H_%M_%S'
 
-
 def record():
     t = datetime.datetime.now().strftime(TIME_FORMAT)
 
@@ -18,20 +17,39 @@ def record():
 
     return filename
 
+def getTranscript(audiofile):
+    f = file(audiofile[:-4]+".txt", "w")
+
+    what = convert(audiofile)
+    who = whoIsThis(audiofile)
+
+    f.write(who +" : "+what)
+
 def convert(audiofile):
-    f = file("transcript_"+audiofile[:-4]+".txt", "w")
 
     response = call_google(audiofile)
     confidence = float( json.dumps( response['response']['results'][0]['alternatives'][0]['confidence'] ) )
     transcript = json.dumps( response['response']['results'][0]['alternatives'][0]['transcript'] )
 
-    if confidence > 0.5:
-        f.write(transcript)
+    if confidence > 0.4:
+        return transcript
     else:
-        f.write("[POOR RECOGNITION]")
+        return "POOR RECOGNITION"
 
+def whoIsThis(audiofile):
+
+    filename = audiofile[:-4]+".wav"
+
+    c = ('sox -r 16k --bits 16 -e signed-integer -c 1 -t raw %s %s' % (audiofile, filename)).split()
+    subprocess.call(c)
+
+    c = ('./speaker-recognition/src/speaker-recognition.py -t predict -i %s -m ./speaker-recognition/src/model.out' % filename).split()
+    s = subprocess.check_output(c).strip()
+
+    who = s[s.index('-> ')+3:].strip()
+    return who
 
 if __name__ == "__main__":
     while(True):
-        t = Thread( target=convert, args=(record(), ) )
+        t = Thread( target=getTranscript, args=(record(), ) )
         t.start()
