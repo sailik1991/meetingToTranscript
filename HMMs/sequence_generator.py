@@ -1,5 +1,6 @@
 import string
 from hmmlearn.hmm import MultinomialHMM
+import numpy as np
 
 class SequenceGenerator:
     
@@ -21,7 +22,7 @@ class SequenceGenerator:
         try:
             return self.topicData[ meetingID.strip() + speakerID.strip() + segmentID.strip() ]
         except:
-            print('No value for "topic" when meetingID = {0}; speakerID = {1} and segmentID = {2}'.format(meetingID.strip(), speakerID.strip(), segmentID.strip()))
+            #print('No value for "topic" when meetingID = {0}; speakerID = {1} and segmentID = {2}'.format(meetingID.strip(), speakerID.strip(), segmentID.strip()))
             return None
 
     def getTopicNames(self):
@@ -44,7 +45,7 @@ class SequenceGenerator:
         try:
             return self.segmentData[ meetingID.strip() + speakerID.strip() + startTime.split('.')[0].strip() ]
         except:
-            print('No value for "segment" when meetingID = {0}; speakerID = {1} and startTime = {2}'.format(meetingID.strip(), speakerID.strip(), startTime.split('.')[0].strip()))
+            #print('No value for "segment" when meetingID = {0}; speakerID = {1} and startTime = {2}'.format(meetingID.strip(), speakerID.strip(), startTime.split('.')[0].strip()))
             return None
 
     def generateSequences(self):
@@ -80,6 +81,7 @@ class HMM_Learner:
     def __init__(self, M):
         self.con = MultinomialHMM ( n_components = M )
         self.incon = MultinomialHMM (n_components = M )
+        self.daID = {'ass':0, 'bck':1, 'be.neg':2, 'be.pos':3, 'el.ass':4, 'el.inf':5, 'el.sug':6, 'el.und':7, 'fra':8, 'inf':9, 'off':10, 'oth':11, 'stl':12, 'sug':13, 'und':14}
 
     def trainHMMs(self, topics, sequences, labels):
         X_con = []
@@ -94,22 +96,51 @@ class HMM_Learner:
                 continue
 
             if sequences[t]:
+                X1 = [[ self.daID[da.lower().strip()] ] for da in sequences[t]]
+                #print X1
                 if 'weak' in labels[t].lower():
-                    X_incon.append( sequences[t] )
+                    X_incon.append( X1 )
                     l_incon.append( len(sequences[t]) )
                 else:
-                    X_con.append( sequences[t] )
+                    X_con.append( X1 )
                     l_con.append( len(sequences[t]) )
         
-        self.con.fit( X_con, l_con )
-        self.incon.fit( X_incon, l_incon )
+        X1 = [ [self.daID[x.lower().strip()]] for x in self.daID.keys() ]
+        X_incon.append(X1)
+        l_incon.append( len(X1) )
+        X_con.append(X1)
+        l_con.append( len(X1) )
+        #print np.array(X_con)
+        #print np.array(l_con)
+        self.con.fit( np.concatenate(X_con), l_con )
+        self.incon.fit( np.concatenate(X_incon), l_incon)
 
     def testHMMs(self, topics, sequences, labels):
+        correct = 0
+        wrong = 0
         for t in topics:
-            if sequence[t]:
-                c = con.predict( sequences[t], len(sequences[t]) )
-                i = incon.predict( sequences[t], len(sequences[t]) )
-                print "Topic {0} c {1} i {2} label {3}".format(t, c, i, labels[t])
+            try:
+                temp = sequences[t]
+                temp = labels[t]
+            except:
+                continue
+
+            if sequences[t]:
+                X1 = [[ self.daID[da.lower().strip()] ] for da in sequences[t]]
+                c = self.con.score( np.concatenate([X1]), [len(sequences[t])] )
+                i = self.incon.score( np.concatenate([X1]), [len(sequences[t])] )
+                if c >= i and 'strong' in labels[t].lower():
+                    correct += 1
+                elif c < i and 'weak' in labels[t].lower():
+                    correct += 1
+                else:
+                    wrong += 1
+                    
+                #print "Topic {0} :pred: {1} :label: {2}".format(t, our_label, labels[t])
+        accuracy = float(correct)/float(correct+wrong)
+        print correct
+        print str(correct+wrong)
+        print accuracy
 
 if __name__ == '__main__':
     sg = SequenceGenerator()
