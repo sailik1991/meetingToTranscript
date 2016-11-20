@@ -1,5 +1,5 @@
-import csv 
 import string
+from hmmlearn.hmm import MultinomialHMM
 
 class SequenceGenerator:
     
@@ -12,7 +12,7 @@ class SequenceGenerator:
 
     def getTopicID(self, meetingID, speakerID, segmentID):
         if self.getTopicData == True:
-            f = open('consistency_ami.csv', 'rb')
+            f = open('topic_data.csv', 'rb')
             for line in f:
                 l = line.strip().split('|')
                 self.topicData[ l[0].strip() + l[2].strip() + l[3].strip() ] = l[1].strip()
@@ -67,6 +67,56 @@ class SequenceGenerator:
 
         return topicSeq
 
+    def generateLabels(self):
+        labels = {}
+        f = open('consistency_labels.csv', 'rb')
+        for l in f:
+            tnl = l.strip().split('|')
+            labels[ tnl[0] ] = tnl[1]
+        return labels
+
+class HMM_Learner:
+    
+    def __init__(self, M):
+        self.con = MultinomialHMM ( n_components = M )
+        self.incon = MultinomialHMM (n_components = M )
+
+    def trainHMMs(self, topics, sequences, labels):
+        X_con = []
+        l_con = []
+        X_incon = []
+        l_incon = []
+        for t in topics:
+            try:
+                temp = sequences[t]
+                temp = labels[t]
+            except:
+                continue
+
+            if sequences[t]:
+                if 'weak' in labels[t].lower():
+                    X_incon.append( sequences[t] )
+                    l_incon.append( len(sequences[t]) )
+                else:
+                    X_con.append( sequences[t] )
+                    l_con.append( len(sequences[t]) )
+        
+        self.con.fit( X_con, l_con )
+        self.incon.fit( X_incon, l_incon )
+
+    def testHMMs(self, topics, sequences, labels):
+        for t in topics:
+            if sequence[t]:
+                c = con.predict( sequences[t], len(sequences[t]) )
+                i = incon.predict( sequences[t], len(sequences[t]) )
+                print "Topic {0} c {1} i {2} label {3}".format(t, c, i, labels[t])
+
 if __name__ == '__main__':
     sg = SequenceGenerator()
-    print( sg.generateSequences() )
+    topics = sg.getTopicNames()
+    sequences = sg.generateSequences()
+    labels = sg.generateLabels()
+
+    hmml = HMM_Learner(2)
+    hmml.trainHMMs(topics, sequences, labels)
+    hmml.testHMMs(topics, sequences, labels)
