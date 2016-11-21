@@ -27,16 +27,19 @@ def create_online_test_data(file_name):
 	with open(file_name, 'rb') as data_file:
 		print 'loading data'
 		data_reader = csv.reader(data_file, delimiter = "|")
-		data = {'words': []}
+		data = {}
+		data['words'] = []
 		for row in data_reader:
-			data['words'].append((row.translate(None, string.punctuation)).lower())
+			print ''.join(row)
+			data['words'].append((''.join(row).translate(None, string.punctuation)).lower())
 	return data
-
-'''def convert_euginio_features(data):
-	data["ea-tag"] = []
-	length = len(data["words"])
+'''
+def convert_topic_das_euginio_features(result):
+	length = len(result)
+	indeterminate = False
 	for i in range(length-1, -1, -1):
-		if		
+		if !indeterminate && result[i] == 'inf':
+			indeterminate = True
 '''
 
 def train(data, data_col, target_col):
@@ -75,7 +78,7 @@ def test_wrapper(args):
 		model = cPickle.load(fid)
 	result = test(model, data, "words", "")
 	f = open(args[3], "w")
-	f.writelines(result)
+	f.writelines("\n".join(result))
 	f.close()
 
 def complete_wrapper(args):
