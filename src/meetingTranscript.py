@@ -7,12 +7,13 @@ from threading import Thread
 
 THRESHOLD = '8%'
 TIME_FORMAT = '%Y%m%d_%H_%M_%S'
+FILE_FORMAT = 'raw'
 
 def record():
     t = datetime.datetime.now().strftime(TIME_FORMAT)
 
-    filename = 'recording%s.raw' %t
-    c = ['rec', '-c', '1', '-r', '16k', '-t', 'raw', filename, 'silence', '0', '1', '00:00:02.0', THRESHOLD]
+    filename = 'recording%s.%s' %(t,FILE_FORMAT)
+    c = ['rec', '-c', '1', '-r', '16k', '-t', FILE_FORMAT, filename, 'silence', '0', '1', '00:00:02.0', THRESHOLD]
     subprocess.call(c)
 
     return filename
@@ -23,7 +24,7 @@ def getTranscript(audiofile):
     what = convert(audiofile)
     who = whoIsThis(audiofile)
 
-    f.write(who +" : "+what)
+    f.write(who +" : "+what+"\n")
 
 def convert(audiofile):
 
