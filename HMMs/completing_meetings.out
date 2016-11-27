@@ -1,0 +1,210 @@
+sengu15@en4119720:~/code/meetingToTranscript/HMMs$ python sequence_generator.py 
+ES2003d=Innovation score
+('und', 'und')
+True
+ES2002d=Digital pens
+('und', 'und')
+True
+ES2003d=Fashion score
+('sug', 'bck')
+True
+ES2014b=Speech Recognition to find it back?
+('und', 'und')
+True
+ES2009b=One touch screen
+('und', 'sug')
+True
+IS1008d=Testing the product
+('und', 'und')
+True
+ES2008c=Spongy remote
+('und', 'sug')
+True
+ES2004b=Combined remote
+('und', 'sug')
+True
+IS1003c=Speech or gesture Technology
+('und', 'und')
+True
+IS1009c=Push or scroll buttons
+('und', 'und')
+True
+ES2004b=Batteries
+('und', 'sug')
+True
+ES2013c=Form of energy
+('und', 'sug')
+True
+ES2009c=Remote shape
+('und', 'und')
+True
+ES2008c=LCD screen
+('und', 'und')
+True
+IS1008d=A place for the microphone
+('und', 'sug')
+True
+ES2012a=Remote ideas
+('und', 'und')
+True
+ES2002d=Teamwork
+('und', 'und')
+True
+IS1004c=Coffee machine interface
+('und', 'sug')
+True
+IS1004b=Do we need n LCD screen?
+('sug', 'bck')
+True
+IS1008d=Sellin the product
+('und', 'und')
+True
+ES2013b=Rechargeable Battery?
+('fra', 'bck')
+True
+IS1002b=Cradle
+('sug', 'bck')
+True
+ES2007a=TV Remote
+('sug', 'bck')
+True
+ES2006b=Target audience
+('und', 'sug')
+True
+IS1007b=FPGA
+('und', 'und')
+True
+ES2003c=Remote design
+('und', 'und')
+True
+IS1007a=Program by content
+('und', 'sug')
+True
+ES2005c=Remote color
+('und', 'und')
+True
+ES2002d=Remote height
+('sug', 'bck')
+True
+IS1009c=Case
+('und', 'und')
+True
+ES2004d=Rubber remote
+('sug', 'bck')
+True
+ES2008a=Television only
+('und', 'und')
+True
+IS1008b=Choosing features to include
+('sug', 'bck')
+True
+IS1007d=With or without LCD
+(-250.4049377048066, "('bck', 'bck')")
+(-250.4049377048066, "('bck', 'bck')")
+(-250.4049377048066, "('bck', 'bck')")
+('bck', 'bck')
+False
+ES2008d=Technologically innovative
+('und', 'und')
+True
+ES2016b=Do we want Speech Recognition?
+('und', 'und')
+True
+ES2004c=Different fasciae
+('und', 'und')
+True
+IS1009b=The shape
+(-59.10517143418928, "('bck', 'bck')")
+('sug', 'bck', 'bck')
+True
+IS1002b=Environmental sensitive
+('inf', 'bck')
+True
+ES2016a=Do we go with the ball?
+('und', 'sug')
+True
+ES2003d=Remote cost
+(-278.30599731970904, "('bck', 'bck')")
+('und', 'sug', 'bck')
+True
+ES2002c=LCD display
+('sug', 'bck')
+True
+ES2003a=Marktpositie AB
+('und', 'und')
+True
+IS1003c=What sort of controller do we want
+('und', 'und')
+True
+ES2009c=Touch screen vs voice recognition                                                                                                                                [0/1278]
+('und', 'und')
+True
+ES2005c=Rechargeable
+('und', 'und')
+True
+IS1008b=Speech Recognition Problems
+('fra', 'bck')
+True
+ES2010b=Button needs
+('und', 'sug')
+True
+ES2002c=Light option
+('und', 'und')
+True
+ES2003c=Manufacturer codes
+('und', 'und')
+True
+ES2007d=Left and right handed
+('und', 'sug')
+True
+ES2002d=Leadership
+('und', 'und')
+True
+ES2005c=Remote casing
+('und', 'und')
+True
+ES2002a=Remote functionality
+('und', 'und')
+True
+ES2007c=Bluetooth
+('und', 'sug')
+True
+ES2007c=Rubber remote
+('und', 'und')
+True
+ES2002c=Technology
+('und', 'sug')
+True
+ES2008c=Button pushing
+('und', 'und')
+True
+ES2008c=Supplements
+(-39.758403885489933, "('ass', 'ass')")
+('und', 'sug', 'bck')
+True
+IS1009d=Selling points
+('und', 'sug')
+True
+IS1009c=Changing channels
+('und', 'und')
+True
+IS1004c=Shape of the remote
+('und', 'und')
+True
+ES2002a=Regions
+('und', 'und')
+True
+ES2010c=Remote batteries
+('sug', 'bck')
+True
+ES2006d=Flipping open
+('und', 'und')
+True
+ES2007b=Voice activation
+('sug', 'bck')
+True
+ES2010b=Target group
+(-51.659926852741421, "('bck', 'bck')")
+('sug', 'bck', 'bck')
+True
+
