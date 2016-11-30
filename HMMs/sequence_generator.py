@@ -10,63 +10,64 @@ import itertools
 class SequenceGenerator:
     
     def __init__(self):
-        self.getTopicData = True
-        self.topicData = {}
+        
+        self.segmentListPerTopic = {}
+        self.topicNames = []
+        f = open('topic_data.csv', 'rb')
+        for line in f:
+            if 'Meeting' in line:
+                continue
+            l = line.strip().split('|')
+            self.topicNames.append( l[1] ) 
+            try:
+                self.segmentListPerTopic[ l[1] ].append( (l[0], l[2], l[3]) )
+            except:
+                self.segmentListPerTopic[ l[1] ] = []
+                self.segmentListPerTopic[ l[1] ].append( (l[0], l[2], l[3]) )
+        f.close()
+        self.topicNames = list(set(self.topicNames))
 
-        self.getSegmentData = True
-        self.segmentData ={}
+        self.segment_time = {}
+        f = open('segment_ids.csv', 'rb') 
+        for line in f:
+            if 'Meeting' in line:
+                continue
+            l = line.strip().split('|')
+            self.segment_time[ l[0]+l[1]+l[2] ] = int(float(l[3])+0.5)
+        f.close()
+            
+        self.topic_start_end = []
+        for t in self.topicNames:
+            start = 10000000
+            end = -10000000
+            for m_id, s_id, seg_id in self.segmentListPerTopic[t]:
+                if self.segment_time[ m_id + s_id + seg_id ] < start:
+                    start = self.segment_time[ m_id + s_id + seg_id ]
+                if self.segment_time[ m_id + s_id + seg_id ] > end:
+                    end = self.segment_time[ m_id + s_id + seg_id ]
+            self.topic_start_end.append((t, start, end))
 
-    def getTopicID(self, meetingID, speakerID, segmentID):
-        if self.getTopicData == True:
-            f = open('topic_data.csv', 'rb')
-            for line in f:
-                l = line.strip().split('|')
-                self.topicData[ l[0].strip() + l[2].strip() + l[3].strip() ] = l[1].strip()
-            f.close()
-            self.getTopicData = False;
-        try:
-            return self.topicData[ meetingID.strip() + speakerID.strip() + segmentID.strip() ]
-        except:
-            return None
+    def getTopicID(self, meetingId, startTime):
+        for topic, start, end in self.topic_start_end:
+            if meetingId in topic and float(startTime) >= start and float(startTime) <= end:
+                return topic
 
     def getTopicNames(self):
-        f = open('topic_data.csv', 'rb') 
-        topicNames = [] 
-        for l in f:     
-            topicNames.append( l.split('|')[1].strip() )
-        f.close()
-        return list(set(topicNames))
-
-    def getSegmentID(self, meetingID, speakerID, startTime):
-        if self.getSegmentData == True:
-            f = open('segment_ids.csv', 'rb') 
-            for line in f:     
-                l = line.strip().split('|')
-                self.segmentData[ l[0].strip() + l[1].strip() +l[3].split('.')[0].strip() ] = l[2].strip()
-            f.close()
-            self.getSegmentData = False
-        try:
-            return self.segmentData[ meetingID.strip() + speakerID.strip() + startTime.split('.')[0].strip() ]
-        except:
-            return None
+        return self.topicNames
 
     def generateSequences(self):
-        topicNames = self.getTopicNames()
         topicSeq = {}
-        for t in topicNames:
+        for t in self.topicNames:
             topicSeq[t] = []
 
         f = open('consistency_ami.csv', 'rb')
         for line in f:
             l = line.strip().split('|')
             meetingID = l[0]
-            speakerID = l[1]
             startTime = l[4]
-            segmentID = self.getSegmentID(meetingID, speakerID, startTime)
-            if segmentID != None:
-                topicName = self.getTopicID(meetingID, speakerID, segmentID)
-                if topicName != None:
-                    topicSeq[topicName].append( l[2].strip() )
+            topicName = self.getTopicID(meetingID, startTime)
+            if topicName != None:
+                topicSeq[topicName].append( l[2].strip() )
 
         return topicSeq
 
