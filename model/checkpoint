@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/baxter/DL/cse591/meetingToTranscript-master/model/591Model"
+all_model_checkpoint_paths: "/home/baxter/DL/cse591/meetingToTranscript-master/model/591Model"
