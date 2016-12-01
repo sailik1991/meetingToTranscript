@@ -177,14 +177,14 @@ class HMM_Learner:
             print (max_score, max_score_da_seq)
         
         return max_score_da_seq, isConsistent
-
-if __name__ == '__main__':
     
+def predict_incomplete_sequences():
     # Train HMM model using AMI Corpus data
     sg = SequenceGenerator()
     topics = sg.getTopicNames()
     sequences = sg.generateSequences()
     labels = sg.generateLabels()
+ 
     hmml = HMM_Learner(2)
     hmml.trainHMMs(topics, sequences, labels)
 
@@ -202,3 +202,51 @@ if __name__ == '__main__':
             da_seq, isConsistent = hmml.generateLabelSequence(sequences[t])
             print da_seq
             print isConsistent
+
+def test_accuracy(k=10):
+    # Train HMM model using AMI Corpus data
+    sg = SequenceGenerator()
+    topics = sg.getTopicNames()
+    sequences = sg.generateSequences()
+    labels = sg.generateLabels()
+
+    random.shuffle(topics)
+    total_samples = len(topics)
+    test_set_size = total_samples/k
+
+    accuracies = []
+
+    for i in xrange(k):
+        train_topics = topics[ 0:i*test_set_size ]
+        train_topics.extend( topics[(i+1)*test_set_size:len(topics)] )
+        hmml = HMM_Learner(2)
+        hmml.trainHMMs(train_topics, sequences, labels)
+
+        # Get inconsistent meeting data
+        test_topics = topics[ i*test_set_size : (i+1)*test_set_size+1 ]
+        predictions = hmml.testHMMs(test_topics, sequences)
+
+        correct = 0
+        wrong = 0
+        for t in test_topics:
+            try:
+                scores = predictions[t]
+                label = labels[t]
+            except:
+                continue
+            if scores[0] <= scores[1] and 'strong' in label.lower():
+                correct += 1
+            elif scores[0] > scores[1] and 'weak' in label.lower():
+                correct += 1
+            else:
+                wrong += 1
+        accuracies.append(float(correct)/float(correct+wrong))
+
+    print accuracies
+    print sum(accuracies)/len(accuracies)
+
+
+if __name__ == '__main__':
+    #predict_incomplete_sequences()
+    test_accuracy()    
+   
