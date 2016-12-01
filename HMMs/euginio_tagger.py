@@ -4,6 +4,8 @@ import sys
 import cPickle
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
+from sequence_generator import SequenceGenerator 
+import operator
 
 def create_data(file_name):
 	'''with open('../../consistency_ami_kim.csv', 'rb') as data_file:'''
@@ -12,15 +14,59 @@ def create_data(file_name):
 		data_reader = csv.reader(data_file, delimiter = "|")
 		headers = data_reader.next()
 		data = {}
+		sg = SequenceGenerator()
+		topics = sg.getTopicNames()
+		data_topics = sg.generateSequences()
+		eu_tags = {}
+		old_meetingID = ""
+		meetingID = ""
+		data["eu_tag"] = []
+		for topic in topics:
+			eu_tags[topic] = convert_topic_das_euginio(data_topics[topic])
 		for title in headers:
 			data[title] = []
+		index = 0
+		count = 0
 		for row in data_reader:
+			# need to find the euginio tags for the group
 			for header, value in zip(headers, row):
+				if header == "Meeting ID":
+					meetingID = value
 				if header == "words":
+					sentence = value.strip()
 					data[header].append((value.translate(None, string.punctuation)).lower())
 				else:
 					data[header].append(value)
+			try:
+				if meetingID != old_meetingID:
+					meeting_data = get_meeting_transcript(meetingID, topics, data_topics)
+					index = 0
+				if sentence in meeting_data[index]:
+					data["eu_tag"].append(eu_tags[topic][index])
+					count += 1
+					index += 1
+				else:
+					data["eu_tag"].append("na")
+			except:
+				for header in headers:
+					data[header] = data[header][:-1]
+			old_meetingID = meetingID
 		print 'data created with '+ str(len(data))+' columns and '+ str(len(data['words']))+' rows'
+		print count
+	return data
+
+def get_meeting_transcript(mID, topics, data_topics):
+	meeting_topics = [topic for topic in topics if mID in topic]
+	start_time = {}
+	for topic in meeting_topics:
+		temp = data_topics[topic][0].split("|")
+		start_time[topic] = float(temp[2])
+	sort = sorted(start_time.items(), key = operator.itemgetter(1))
+	meeting_topics = []
+	meeting_topics.extend(row[0] for row in sort)
+	data = []
+	for topic in meeting_topics:
+		data.extend(data_topics[topic])
 	return data
 
 def create_online_test_data(file_name):
@@ -33,14 +79,25 @@ def create_online_test_data(file_name):
 			print ''.join(row)
 			data['words'].append((''.join(row).translate(None, string.punctuation)).lower())
 	return data
-'''
-def convert_topic_das_euginio_features(result):
-	length = len(result)
-	indeterminate = False
+
+def convert_topic_das_euginio(data):
+	length = len(data)
+	eu_tag = [None] * length
+	determinate = True
 	for i in range(length-1, -1, -1):
-		if !indeterminate && result[i] == 'inf':
-			indeterminate = True
-'''
+		da = data[i].split("|")
+		if determinate and (da[0] == "sug" or "el" in da[0] or da[0] == "off"):
+			eu_tag[i] = "prop"
+		elif not determinate and (da[0] == "sug" or "el" in da[0] or da[0] == "off"):
+			eu_tag[i] = "pdo"
+		elif determinate and (da[0] == "off" or (da[0] == "ass" and da[1] == "POS")):
+			eu_tag[i] = "commit"
+		elif determinate and da[0] == 'inf':
+			eu_tag[i] = "uo"
+			determinate = False
+		else:
+			eu_tag[i] = "na"
+	return eu_tag
 
 def train(data, data_col, target_col):
 	print 'start training'
@@ -92,8 +149,8 @@ def complete_wrapper(args):
 	for key in data.keys():
 		train_data[key] = data[key][:length]
 		test_data[key] = data[key][length:]
-	model = train(data, "words", "Da-name")
-	result = test(model, data, "words", "Da-name")
+	model = train(data, "words", "eu_tag")
+	result = test(model, data, "words", "eu_tag")
 	print "percentage result on test data " + str(result)
 
 ''' Reads arguments from the command line and calls the appropriate function 
